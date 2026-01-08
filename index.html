@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Roadmap Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: #f5f7fa;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-main {
+            flex: 1;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .form-container {
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 35px;
+        }
+
+        .form-title {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .form-description {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 14px;
+        }
+
+        .form-input {
+            padding: 12px 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-wrapper { position: relative; }
+
+        .suggestions-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid #667eea;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+        }
+
+        .suggestions-dropdown.active { display: block; }
+
+        .suggestion-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .suggestion-item:hover {
+            background: #f8f9fa;
+            padding-left: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .skills-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .skill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .skill-input-wrapper {
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-skill-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .error-message {
+            background: #ffe5e5;
+            color: #c0392b;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        .error-message.active { display: block; }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #e0e6ed;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-content-section {
+            display: none;
+        }
+
+        .tab-content-section.active {
+            display: block;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .recommendation-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 6px;
+        }
+
+        .skill-item {
+            display: inline-block;
+            background: white;
+            border: 1px solid #e0e6ed;
+            padding: 6px 12px;
+            margin: 5px 5px 5px 0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .app-footer {
+            background: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            font-size: 14px;
+        }
+
+        .api-setup {
+            background: #e8f4f8;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .api-setup.active { display: block; }
+
+        .api-setup-content {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .api-key-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px;
+            border: 1px solid #3498db;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .api-setup-btn {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .api-setup-btn:hover { background: #2980b9; }
+
+        .api-status {
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .api-status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .api-status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .setup-toggle {
+            display: inline-block;
+            padding: 8px 12px;
+            background: #e8f4f8;
+            border: 1px solid #3498db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #3498db;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .setup-toggle:hover { background: #d4e8f0; }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(102, 126, 234, 0.3);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            margin-right: 5px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .header-content h1 { font-size: 26px; }
+            .skill-input-wrapper { flex-direction: column; }
+            .add-skill-btn { width: 100%; }
+            .submit-btn { width: 100%; }
+        }
+
+        /* Auth Styles */
+        .auth-container {
+            max-width: 400px;
+            margin: 40px auto;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            padding: 35px;
+        }
+
+        .auth-title {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .auth-subtitle {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-input {
+            padding: 12px 15px;
+            border: 2px solid #e0e6ed;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .auth-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .auth-toggle {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e6ed;
+        }
+
+        .auth-toggle-text {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .auth-toggle-link {
+            color: #667eea;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .auth-toggle-link:hover { text-decoration: underline; }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-email {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .logout-btn:hover { background: #c0392b; }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            display: none;
+            margin-bottom: 15px;
+        }
+
+        .success-message.active { display: block; }
+
+        .roadmaps-history {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+
+        .roadmap-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .roadmap-info {
+            flex: 1;
+        }
+
+        .roadmap-career {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .roadmap-date {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-top: 5px;
+        }
+
+        .roadmap-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .roadmap-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .load-btn {
+            background: #3498db;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .roadmap-btn:hover { opacity: 0.8; }
+
+        .section-divider {
+            text-align: center;
+            color: #95a5a6;
+            margin: 30px 0;
+            font-size: 14px;
+        }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-content">
+                <h1>🚀 Career Roadmap Generator</h1>
+                <p class="header-subtitle">Plan your career development with personalized skill recommendations</p>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <!-- Main Form Section -->
+            <div id="formSection">
+                <div class="form-container">
+                    <div class="form-card">
+                        <h2 class="form-title">📋 Create Your Career Roadmap</h2>
+                        <p class="form-description">Enter your target career and current skills to get personalized learning recommendations</p>
+
+                        <form id="roadmapForm">
+                            <div id="errorMessage" class="error-message"></div>
+
+                            <div class="form-group">
+                                <label class="form-label">🎯 Target Career</label>
+                                <div class="input-wrapper">
+                                    <input id="career" type="text" placeholder="e.g., Full Stack Developer" class="form-input" autocomplete="off" />
+                                    <div id="careerSuggestions" class="suggestions-dropdown"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">💡 Your Current Skills</label>
+                                <div class="skill-input-wrapper">
+                                    <div class="input-wrapper" style="flex: 1;">
+                                        <input id="skills" type="text" placeholder="Type a skill and press Enter" class="form-input" autocomplete="off" />
+                                        <div id="skillSuggestions" class="suggestions-dropdown"></div>
+                                    </div>
+                                    <button type="button" class="add-skill-btn" id="addSkillBtn">Add</button>
+                                </div>
+                                <div id="skillsTags" class="skills-tags"></div>
+                                <p id="skillCount" style="font-size: 12px; color: #95a5a6; margin-top: 5px;">0 skills added</p>
+                            </div>
+
+                            <button type="submit" class="submit-btn">🚀 Generate Roadmap</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Saved Roadmaps Section -->
+                <div id="roadmapsSection" class="roadmaps-history hidden">
+                    <div class="form-card">
+                        <h3 class="form-title">📚 Your Saved Roadmaps</h3>
+                        <p class="form-description">Load or manage your previously saved career roadmaps</p>
+                        <div id="roadmapsList"></div>
+                    </div>
+                </div>
+
+                <div id="resultsContainer"></div>
+            </div>
+        </main>
+
+        <footer class="app-footer">
+            <p>&copy; 2026 Career Roadmap Generator. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Configuration
+        const BACKEND_URL = 'http://localhost:5000';
+
+        // ==================== Authentication State ====================
+        let authToken = localStorage.getItem('authToken');
+        let currentUser = localStorage.getItem('currentUser') ? JSON.parse(localStorage.getItem('currentUser')) : null;
+
+        // ==================== Initialize App ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            showFormSection();
+            loadUserRoadmaps();
+        });
+
+        // ==================== Authentication Functions ====================
+        // Auth removed - using app directly without login
+
+
+        // ==================== Roadmap Management ====================
+        async function saveRoadmap(career, skills, recommendations) {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/roadmaps`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ career, skills, recommendations })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    loadUserRoadmaps();
+                    return data;
+                }
+            } catch (error) {
+                console.error('Save roadmap error:', error);
+            }
+        }
+
+        async function loadUserRoadmaps() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/roadmaps`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+
+                if (!response.ok) return;
+
+                const data = await response.json();
+                displayRoadmapHistory(data.roadmaps || []);
+            } catch (error) {
+                console.error('Load roadmaps error:', error);
+            }
+        }
+
+        function displayRoadmapHistory(roadmaps) {
+            const roadmapsSection = document.getElementById('roadmapsSection');
+            const roadmapsList = document.getElementById('roadmapsList');
+
+            if (roadmaps.length === 0) {
+                roadmapsSection.classList.add('hidden');
+                return;
+            }
+
+            roadmapsSection.classList.remove('hidden');
+            roadmapsList.innerHTML = roadmaps.map(rm => `
+                <div class="roadmap-item">
+                    <div class="roadmap-info">
+                        <div class="roadmap-career">🎯 ${rm.career}</div>
+                        <div class="roadmap-date">${new Date(rm.createdAt).toLocaleDateString()}</div>
+                    </div>
+                    <div class="roadmap-actions">
+                        <button class="roadmap-btn load-btn" onclick="loadRoadmap('${rm.id}')">Load</button>
+                        <button class="roadmap-btn delete-btn" onclick="deleteRoadmap('${rm.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function deleteRoadmap(id) {
+            if (!confirm('Delete this roadmap?')) return;
+
+            try {
+                await fetch(`${BACKEND_URL}/api/roadmaps/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                loadUserRoadmaps();
+            } catch (error) {
+                console.error('Delete error:', error);
+            }
+        }
+
+        async function loadRoadmap(id) {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/roadmaps/${id}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                if (response.ok) {
+                    const roadmap = await response.json();
+                    document.getElementById('career').value = roadmap.career;
+                    userSkills = roadmap.skills;
+                    renderSkills();
+                    document.getElementById('career').focus();
+                }
+            } catch (error) {
+                console.error('Load error:', error);
+            }
+        }
+
+        function clearResults() {
+            document.getElementById('resultsContainer').innerHTML = '';
+        }
+
+        // Data
+        const CAREER_SUGGESTIONS = [
+            // CSE - Computer Science Engineering
+            'Full Stack Developer', 'Frontend Developer', 'Backend Developer', 'Software Engineer',
+            'React Developer', 'Vue.js Developer', 'Angular Developer', 'Mobile Developer',
+            'Flutter Developer', 'Game Developer', 'Embedded Systems Developer',
+            
+            // AIE - Artificial Intelligence Engineering
+            'AI Engineer', 'Machine Learning Engineer', 'Deep Learning Engineer', 'NLP Engineer',
+            'Computer Vision Engineer', 'Robotics Engineer', 'AI Researcher', 'ML Ops Engineer',
+            'Data Scientist', 'AI/ML Architect', 'Prompt Engineer', 'LLM Specialist',
+            
+            // CYS - Cybersecurity Engineering
+            'Cybersecurity Engineer', 'Security Architect', 'Penetration Tester', 'Security Analyst',
+            'Network Security Engineer', 'Application Security Engineer', 'Security Operations Engineer',
+            'Incident Response Specialist', 'Malware Analyst', 'Blue Team Engineer',
+            
+            // ECE - Electronics & Communication Engineering
+            'Electronics Engineer', 'Communication Systems Engineer', 'VLSI Design Engineer',
+            'Embedded Systems Engineer', 'RF Engineer', 'Signal Processing Engineer',
+            'Chip Design Engineer', 'Power Electronics Engineer', 'Microcontroller Developer',
+            'IoT Developer', '5G Network Engineer', 'Wireless Communications Specialist',
+            
+            // EEE - Electrical & Electronics Engineering
+            'Electrical Engineer', 'Power Systems Engineer', 'Control Systems Engineer',
+            'Electrical Design Engineer', 'Energy Engineer', 'Grid Modernization Engineer',
+            'Renewable Energy Engineer', 'High Voltage Engineer', 'Switchgear Designer',
+            'Automation Engineer', 'Industrial Electrical Engineer',
+            
+            // Cloud & DevOps
+            'DevOps Engineer', 'Cloud Architect', 'Cloud Engineer', 'Infrastructure Engineer',
+            'AWS Solutions Architect', 'Kubernetes Engineer', 'Site Reliability Engineer',
+            'Cloud Security Engineer', 'Cloud Platform Engineer',
+            
+            // Data & Analytics
+            'Data Engineer', 'Data Analyst', 'Big Data Engineer', 'Analytics Engineer',
+            'Business Intelligence Developer', 'Data Architect',
+            
+            // Design & UX
+            'UI/UX Designer', 'UX Researcher', 'Product Designer', 'Interaction Designer',
+            'UX Writer', 'Design System Designer',
+            
+            // Database & Systems
+            'Database Administrator', 'Database Engineer', 'System Administrator',
+            'Database Architect', 'Performance Tuning Specialist',
+            
+            // Quality & Testing
+            'QA Engineer', 'Test Automation Engineer', 'QA Lead', 'Quality Assurance Manager',
+            'Test Architect',
+            
+            // Management & Leadership
+            'Product Manager', 'Solutions Architect', 'Tech Lead', 'Engineering Manager',
+            'Project Manager', 'Scrum Master', 'CTO', 'VP Engineering',
+            
+            // Mechanical Engineering
+            'Mechanical Engineer', 'CAD Designer', 'Mechanical Design Engineer',
+            'Manufacturing Engineer', 'Automotive Engineer', 'Thermal Engineer',
+            'Structural Analysis Engineer', 'Robotics Mechanical Engineer',
+            
+            // Civil Engineering
+            'Civil Engineer', 'Structural Engineer', 'Construction Manager',
+            'Transportation Engineer', 'Geotechnical Engineer', 'BIM Coordinator',
+            
+            // Biomedical Engineering
+            'Biomedical Engineer', 'Medical Device Designer', 'Bioinformatics Engineer',
+            'Healthcare IT Specialist', 'Clinical Engineer',
+            
+            // Aerospace Engineering
+            'Aerospace Engineer', 'Flight Systems Engineer', 'Avionics Engineer',
+            'Propulsion Engineer', 'Structures Engineer',
+            
+            // Emerging Tech
+            'Blockchain Developer', 'Web3 Developer', 'Smart Contract Developer',
+            'AR/VR Developer', 'Quantum Computing Engineer',
+        ];
+
+        const SKILL_SUGGESTIONS = [
+            // CSE - Web Technologies & Frameworks
+            'JavaScript', 'TypeScript', 'HTML', 'CSS', 'React', 'Vue.js', 'Angular', 'Svelte',
+            'Next.js', 'Nuxt.js', 'Remix', 'Astro', 'Node.js', 'Express.js', 'FastAPI', 'Django',
+            'Ruby on Rails', 'Spring Boot', 'ASP.NET', 'PHP', 'Laravel', 'Go', 'Rust',
+            
+            // CSE - Programming Languages
+            'Python', 'Java', 'C++', 'C#', 'C', 'Kotlin', 'Swift', 'Objective-C',
+            'R', 'MATLAB', 'Scala', 'Elixir', 'Clojure', 'Perl',
+            
+            // CSE - Mobile Development
+            'React Native', 'Flutter', 'Xamarin', 'Ionic', 'Native Android', 'Native iOS',
+            
+            // CSE - Databases & Data
+            'SQL', 'MongoDB', 'PostgreSQL', 'MySQL', 'Redis', 'Elasticsearch',
+            'Cassandra', 'DynamoDB', 'Firebase', 'Firestore', 'GraphQL', 'Oracle',
+            'NoSQL', 'Data Modeling',
+            
+            // AIE - AI & Machine Learning
+            'TensorFlow', 'PyTorch', 'Keras', 'scikit-learn', 'OpenAI API', 'Hugging Face',
+            'LLM Fine-tuning', 'Prompt Engineering', 'RAG Systems', 'BERT', 'GPT',
+            'Computer Vision', 'NLP', 'Deep Learning', 'Neural Networks', 'Reinforcement Learning',
+            'Transformers', 'Attention Mechanisms', 'Model Deployment', 'MLflow', 'Weights & Biases',
+            
+            // CYS - Cybersecurity
+            'Cryptography', 'Network Security', 'Application Security', 'Penetration Testing',
+            'Ethical Hacking', 'OWASP', 'Vulnerability Assessment', 'Incident Response',
+            'SSL/TLS', 'Firewall Configuration', 'IDS/IPS', 'Security Frameworks',
+            'Compliance (GDPR, HIPAA)', 'Security Auditing', 'Malware Analysis',
+            
+            // ECE - Electronics & Communication
+            'VLSI Design', 'Circuit Design', 'PCB Design', 'Microcontroller Programming',
+            'Arduino', 'Raspberry Pi', 'Embedded C', 'Assembly Language',
+            'Signal Processing', 'Digital Signal Processing (DSP)', 'RF Engineering',
+            'Communication Systems', '5G Technology', 'Wireless Networking',
+            'FPGA', 'Verilog', 'VHDL', 'SystemVerilog', 'IoT Protocols (MQTT, CoAP)',
+            
+            // EEE - Electrical Engineering
+            'Power Systems', 'Control Systems', 'MATLAB/Simulink', 'Power Electronics',
+            'Renewable Energy Systems', 'Smart Grid Technology', 'Motor Control',
+            'Energy Management', 'Electrical Design', 'CAD (AutoCAD, EPLAN)',
+            'PLC Programming', 'SCADA', 'Industrial Automation',
+            
+            // Cloud & DevOps
+            'Docker', 'Kubernetes', 'AWS', 'Google Cloud', 'Azure', 'Terraform',
+            'Jenkins', 'GitLab CI/CD', 'GitHub Actions', 'CloudFormation', 'Serverless',
+            'Infrastructure as Code', 'Container Orchestration',
+            
+            // Styling & UI
+            'Tailwind CSS', 'Bootstrap', 'Material Design', 'SASS/SCSS', 'Styled Components',
+            'Chakra UI', 'Ant Design', 'Foundation',
+            
+            // Development Tools & Practices
+            'Git', 'GitHub', 'GitLab', 'Bitbucket', 'REST API', 'gRPC', 'Microservices',
+            'Webpack', 'Vite', 'Rollup', 'Parcel', 'Testing', 'Jest', 'Pytest', 'Mocha',
+            'Cypress', 'Selenium', 'Unit Testing', 'Integration Testing', 'API Testing',
+            
+            // Data Science & Analytics
+            'Pandas', 'NumPy', 'Jupyter', 'Plotly', 'Matplotlib', 'Seaborn', 'Tableau',
+            'Power BI', 'Apache Spark', 'Hadoop', 'ETL', 'Data Pipelines', 'Apache Kafka',
+            'BigQuery', 'Data Warehousing',
+            
+            // Mechanical Engineering
+            'CAD (AutoCAD, SolidWorks)', 'FEA (ANSYS, Abaqus)', 'CFD (Computational Fluid Dynamics)',
+            'CATIA', 'Fusion 360', 'Creo', 'CAM Programming', '3D Modeling', 'Manufacturing',
+            'Thermal Analysis', 'Stress Analysis', 'Simulation',
+            
+            // Civil Engineering
+            'Civil CAD (AutoCAD, Revit)', 'BIM (Building Information Modeling)', 'STAAD Pro',
+            'SAP2000', 'Structural Analysis', 'Transportation Design', 'GIS',
+            'Construction Management', 'Surveying Software',
+            
+            // Biomedical Engineering
+            'MATLAB', 'LabVIEW', 'Medical Imaging', 'Bioinformatics', 'Python (for bio)',
+            'Signal Processing', 'Healthcare IT', 'Electronic Health Records (EHR)',
+            
+            // Blockchain & Web3
+            'Solidity', 'Web3.js', 'Ethers.js', 'Smart Contracts', 'DeFi', 'NFTs',
+            'Blockchain Architecture', 'Consensus Mechanisms',
+            
+            // IoT & Embedded
+            'IoT Architecture', 'Edge Computing', 'Sensor Integration', 'Real-time Systems',
+            'Low-power Design',
+            
+            // Soft Skills
+            'Communication', 'Problem Solving', 'Team Collaboration', 'Project Management',
+            'Agile', 'Scrum', 'Kanban', 'Leadership', 'Critical Thinking', 'Time Management',
+            'Documentation', 'Technical Writing',
+        ];
+
+        // DOM
+        const careerInput = document.getElementById('career');
+        const skillsInput = document.getElementById('skills');
+        const careerSuggestions = document.getElementById('careerSuggestions');
+        const skillSuggestions = document.getElementById('skillSuggestions');
+        const skillsTags = document.getElementById('skillsTags');
+        const skillCount = document.getElementById('skillCount');
+        const roadmapForm = document.getElementById('roadmapForm');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const addSkillBtn = document.getElementById('addSkillBtn');
+        const submitBtn = document.querySelector('[type="submit"]');
+
+        // State
+        let userSkills = [];
+        let career = '';
+
+        // API Functions
+        async function generateAIRecommendations(targetCareer, skills) {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/generate-recommendations`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        career: targetCareer,
+                        skills: skills
+                    })
+                });
+
+                if (!response.ok) {
+                    console.error('Backend Error:', response.status);
+                    return generateStaticRecommendations(targetCareer, skills);
+                }
+
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error:', error);
+                return generateStaticRecommendations(targetCareer, skills);
+            }
+        }
+
+        function generateStaticRecommendations(targetCareer, skills) {
+            const allSkills = SKILL_SUGGESTIONS;
+            const missing = allSkills.filter(s => !skills.includes(s)).slice(0, 5);
+
+            return {
+                missingSkills: missing,
+                recommendations: [
+                    'Master the fundamentals of your target career path',
+                    'Build real-world projects to demonstrate expertise',
+                    'Contribute to open-source projects in your domain',
+                    'Network with professionals in your target field',
+                    'Pursue industry certifications relevant to your career'
+                ],
+                nextSteps: [
+                    'Learn Missing Skills - Focus on top 3 skills needed',
+                    'Build Projects - Create 2-3 portfolio projects',
+                    'Get Certified - Earn industry-recognized certifications'
+                ],
+                resources: []
+            };
+        }
+
+        // Career suggestions
+        careerInput.addEventListener('input', (e) => {
+            career = e.target.value.trim();
+            if (career === '') {
+                careerSuggestions.classList.remove('active');
+                return;
+            }
+            const filtered = CAREER_SUGGESTIONS.filter(c => c.toLowerCase().includes(career.toLowerCase()));
+            careerSuggestions.innerHTML = '';
+            filtered.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.textContent = c;
+                div.onmousedown = (e) => {
+                    e.preventDefault();
+                    careerInput.value = c;
+                    career = c;
+                    careerSuggestions.classList.remove('active');
+                    careerInput.focus();
+                };
+                careerSuggestions.appendChild(div);
+            });
+            careerSuggestions.classList.add('active');
+        });
+
+        careerInput.addEventListener('blur', () => {
+            setTimeout(() => careerSuggestions.classList.remove('active'), 200);
+        });
+
+        // Skill suggestions
+        skillsInput.addEventListener('input', (e) => {
+            const value = e.target.value.trim();
+            if (value === '') {
+                skillSuggestions.classList.remove('active');
+                return;
+            }
+            const filtered = SKILL_SUGGESTIONS.filter(s => s.toLowerCase().includes(value.toLowerCase()) && !userSkills.includes(s));
+            skillSuggestions.innerHTML = '';
+            filtered.slice(0, 10).forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.textContent = s;
+                div.onmousedown = (e) => {
+                    e.preventDefault();
+                    if (!userSkills.includes(s)) {
+                        userSkills.push(s);
+                        skillsInput.value = '';
+                        skillSuggestions.classList.remove('active');
+                        renderSkills();
+                        skillsInput.focus();
+                    }
+                };
+                skillSuggestions.appendChild(div);
+            });
+            if (filtered.length > 0) skillSuggestions.classList.add('active');
+        });
+
+        skillsInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const skill = skillsInput.value.trim();
+                if (skill && !userSkills.includes(skill)) {
+                    userSkills.push(skill);
+                    skillsInput.value = '';
+                    skillSuggestions.classList.remove('active');
+                    renderSkills();
+                }
+            }
+        });
+
+        skillsInput.addEventListener('blur', () => {
+            setTimeout(() => skillSuggestions.classList.remove('active'), 200);
+        });
+
+        function renderSkills() {
+            skillsTags.innerHTML = '';
+            userSkills.forEach(skill => {
+                const span = document.createElement('div');
+                span.className = 'skill-tag';
+                span.innerHTML = `${skill} <button type="button" onclick="removeSkill('${skill}')" style="background:none; border:none; color:white; cursor:pointer; margin-left:5px;">×</button>`;
+                skillsTags.appendChild(span);
+            });
+            skillCount.textContent = `${userSkills.length} skills added`;
+        }
+
+        function removeSkill(skill) {
+            userSkills = userSkills.filter(s => s !== skill);
+            renderSkills();
+        }
+
+        addSkillBtn.addEventListener('click', () => {
+            const skill = skillsInput.value.trim();
+            if (skill && !userSkills.includes(skill)) {
+                userSkills.push(skill);
+                skillsInput.value = '';
+                skillSuggestions.classList.remove('active');
+                renderSkills();
+            }
+        });
+
+        // Form submission
+        roadmapForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorMessage.classList.remove('active');
+
+            if (!career || userSkills.length === 0) {
+                errorMessage.textContent = 'Please enter a career and at least one skill.';
+                errorMessage.classList.add('active');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span> Analyzing...';
+
+            try {
+                const recommendations = await generateAIRecommendations(career, userSkills);
+                displayResults(career, userSkills, recommendations);
+                
+                // Auto-save roadmap
+                await saveRoadmap(career, userSkills, recommendations);
+            } catch (error) {
+                console.error('Error:', error);
+                const recommendations = generateStaticRecommendations(career, userSkills);
+                displayResults(career, userSkills, recommendations);
+                await saveRoadmap(career, userSkills, recommendations);
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '🚀 Generate Roadmap';
+        });
+
+        function displayResults(targetCareer, skills, recommendations) {
+            const missing = recommendations.missingSkills || [];
+            const match = Math.round((skills.length / (skills.length + missing.length)) * 100);
+
+            let html = `
+                <div style="max-width: 900px; margin: 30px auto;">
+                    <h2 style="text-align: center; color: #2c3e50; margin-bottom: 20px;">🎯 Analysis for ${targetCareer}</h2>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 30px;">
+                        <div class="stat-card"><div class="stat-number">${match}%</div><div class="stat-label">Match Score</div></div>
+                        <div class="stat-card"><div class="stat-number">${skills.length}</div><div class="stat-label">Your Skills</div></div>
+                        <div class="stat-card"><div class="stat-number">${missing.length}</div><div class="stat-label">To Learn</div></div>
+                    </div>
+
+                    <div class="tab-nav">
+                        <button class="tab-button active" onclick="switchTab('overview')">📊 Overview</button>
+                        <button class="tab-button" onclick="switchTab('analysis')">📋 Analysis</button>
+                        <button class="tab-button" onclick="switchTab('roadmap')">🗺️ Roadmap</button>
+                    </div>
+
+                    <div id="overview" class="tab-content-section active">
+                        <div class="section-card">
+                            <h3>Career Recommendations</h3>
+                            <div class="recommendation-item">
+                                <strong>${targetCareer}</strong>
+                                <p>You're ${match}% ready! Focus on missing skills to advance your career.</p>
+                            </div>
+                        </div>
+                        <div class="section-card">
+                            <h3>Next Steps</h3>
+                            ${(recommendations.nextSteps || []).map((step, i) => `
+                                <div class="recommendation-item">
+                                    <strong>${i+1}. ${step.split(' - ')[0]}</strong>
+                                    <p>${step.split(' - ')[1] || 'Focus on this area to advance your career'}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div id="analysis" class="tab-content-section">
+                        <div class="section-card">
+                            <h3>Your Skills (${skills.length})</h3>
+                            <div>${skills.map(s => `<span class="skill-item">${s}</span>`).join('')}</div>
+                        </div>
+                        <div class="section-card">
+                            <h3>Skills to Learn (${missing.length})</h3>
+                            <div>${missing.map(s => `<span class="skill-item" style="background:#ffe5e5; border-color:#e74c3c; color:#c0392b;">${s}</span>`).join('')}</div>
+                        </div>
+                    </div>
+
+                    <div id="roadmap" class="tab-content-section">
+                        <div class="section-card">
+                            <h3>Learning Roadmap</h3>
+                            ${missing.map((skill, i) => `
+                                <div class="recommendation-item">
+                                    <strong>Step ${i+1}: ${skill}</strong>
+                                    <p>Duration: 30-50 hours | Check Udemy, YouTube, Official Docs</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            resultsContainer.innerHTML = html;
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content-section').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
