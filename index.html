@@ -645,19 +645,11 @@
         // Configuration
         const BACKEND_URL = 'http://localhost:5000';
 
-        // ==================== Authentication State ====================
-        let authToken = localStorage.getItem('authToken');
-        let currentUser = localStorage.getItem('currentUser') ? JSON.parse(localStorage.getItem('currentUser')) : null;
-
         // ==================== Initialize App ====================
         document.addEventListener('DOMContentLoaded', () => {
             showFormSection();
             loadUserRoadmaps();
         });
-
-        // ==================== Authentication Functions ====================
-        // Auth removed - using app directly without login
-
 
         // ==================== Roadmap Management ====================
         async function saveRoadmap(career, skills, recommendations) {
@@ -665,8 +657,7 @@
                 const response = await fetch(`${BACKEND_URL}/api/roadmaps`, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${authToken}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ career, skills, recommendations })
                 });
@@ -683,9 +674,7 @@
 
         async function loadUserRoadmaps() {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/roadmaps`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
+                const response = await fetch(`${BACKEND_URL}/api/roadmaps`);
 
                 if (!response.ok) return;
 
@@ -725,8 +714,7 @@
 
             try {
                 await fetch(`${BACKEND_URL}/api/roadmaps/${id}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${authToken}` }
+                    method: 'DELETE'
                 });
                 loadUserRoadmaps();
             } catch (error) {
@@ -736,9 +724,7 @@
 
         async function loadRoadmap(id) {
             try {
-                const response = await fetch(`${BACKEND_URL}/api/roadmaps/${id}`, {
-                    headers: { 'Authorization': `Bearer ${authToken}` }
-                });
+                const response = await fetch(`${BACKEND_URL}/api/roadmaps/${id}`);
                 if (response.ok) {
                     const roadmap = await response.json();
                     document.getElementById('career').value = roadmap.career;
@@ -934,6 +920,7 @@
         const addSkillBtn = document.getElementById('addSkillBtn');
         const submitBtn = document.querySelector('[type="submit"]');
 
+
         // State
         let userSkills = [];
         let career = '';
@@ -1087,7 +1074,10 @@
             }
         });
 
+
+
         // Form submission
+
         roadmapForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             errorMessage.classList.remove('active');
@@ -1121,6 +1111,7 @@
         function displayResults(targetCareer, skills, recommendations) {
             const missing = recommendations.missingSkills || [];
             const match = Math.round((skills.length / (skills.length + missing.length)) * 100);
+            const gradings = recommendations.gradings || null;
 
             let html = `
                 <div style="max-width: 900px; margin: 30px auto;">
@@ -1130,6 +1121,7 @@
                         <div class="stat-card"><div class="stat-number">${match}%</div><div class="stat-label">Match Score</div></div>
                         <div class="stat-card"><div class="stat-number">${skills.length}</div><div class="stat-label">Your Skills</div></div>
                         <div class="stat-card"><div class="stat-number">${missing.length}</div><div class="stat-label">To Learn</div></div>
+                        ${gradings ? `<div class="stat-card"><div class="stat-number" style="font-size: 32px; color: ${gradings.overallGrade === 'A' ? '#27ae60' : gradings.overallGrade === 'B' ? '#3498db' : gradings.overallGrade === 'C' ? '#f39c12' : gradings.overallGrade === 'D' ? '#e67e22' : '#e74c3c'};">${gradings.overallGrade}</div><div class="stat-label">Overall Grade</div></div>` : ''}
                     </div>
 
                     <div class="tab-nav">
@@ -1139,6 +1131,64 @@
                     </div>
 
                     <div id="overview" class="tab-content-section active">
+                        ${gradings ? `
+                        <div class="section-card">
+                            <h3>📈 Skill Grading for ${targetCareer}</h3>
+                            <div style="margin-bottom: 20px;">
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span style="font-weight: 600; color: #2c3e50;">Essential Skills</span>
+                                        <span style="color: #27ae60; font-weight: 600;">${gradings.essentialSkills.count}/${gradings.essentialSkills.skills.length} (${gradings.essentialSkills.percentage}%)</span>
+                                    </div>
+                                    <div style="background: #ecf0f1; height: 10px; border-radius: 5px; overflow: hidden;">
+                                        <div style="background: #27ae60; height: 100%; width: ${gradings.essentialSkills.percentage}%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                                        ${gradings.essentialSkills.skills.map(skill => `
+                                            <span style="padding: 4px 10px; border-radius: 4px; font-size: 12px; background: ${gradings.essentialSkills.status[skill] ? '#d5f4e6' : '#ffe5e5'}; color: ${gradings.essentialSkills.status[skill] ? '#27ae60' : '#e74c3c'}; border: 1px solid ${gradings.essentialSkills.status[skill] ? '#27ae60' : '#e74c3c'};">
+                                                ${gradings.essentialSkills.status[skill] ? '✓' : '✗'} ${skill}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span style="font-weight: 600; color: #2c3e50;">Important Skills</span>
+                                        <span style="color: #3498db; font-weight: 600;">${gradings.importantSkills.count}/${gradings.importantSkills.skills.length} (${gradings.importantSkills.percentage}%)</span>
+                                    </div>
+                                    <div style="background: #ecf0f1; height: 10px; border-radius: 5px; overflow: hidden;">
+                                        <div style="background: #3498db; height: 100%; width: ${gradings.importantSkills.percentage}%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                                        ${gradings.importantSkills.skills.map(skill => `
+                                            <span style="padding: 4px 10px; border-radius: 4px; font-size: 12px; background: ${gradings.importantSkills.status[skill] ? '#d6eef8' : '#ffe5e5'}; color: ${gradings.importantSkills.status[skill] ? '#3498db' : '#e74c3c'}; border: 1px solid ${gradings.importantSkills.status[skill] ? '#3498db' : '#e74c3c'};">
+                                                ${gradings.importantSkills.status[skill] ? '✓' : '✗'} ${skill}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+
+                                <div style="margin-bottom: 15px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                        <span style="font-weight: 600; color: #2c3e50;">Nice to Have</span>
+                                        <span style="color: #f39c12; font-weight: 600;">${gradings.niceToHaveSkills.count}/${gradings.niceToHaveSkills.skills.length} (${gradings.niceToHaveSkills.percentage}%)</span>
+                                    </div>
+                                    <div style="background: #ecf0f1; height: 10px; border-radius: 5px; overflow: hidden;">
+                                        <div style="background: #f39c12; height: 100%; width: ${gradings.niceToHaveSkills.percentage}%; transition: width 0.3s ease;"></div>
+                                    </div>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                                        ${gradings.niceToHaveSkills.skills.map(skill => `
+                                            <span style="padding: 4px 10px; border-radius: 4px; font-size: 12px; background: ${gradings.niceToHaveSkills.status[skill] ? '#fef5e7' : '#ffe5e5'}; color: ${gradings.niceToHaveSkills.status[skill] ? '#f39c12' : '#e74c3c'}; border: 1px solid ${gradings.niceToHaveSkills.status[skill] ? '#f39c12' : '#e74c3c'};">
+                                                ${gradings.niceToHaveSkills.status[skill] ? '✓' : '✗'} ${skill}
+                                            </span>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                        
                         <div class="section-card">
                             <h3>Career Recommendations</h3>
                             <div class="recommendation-item">
