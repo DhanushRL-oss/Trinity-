@@ -643,7 +643,10 @@
 
     <script>
         // Configuration
-        const BACKEND_URL = 'http://localhost:5000';
+        // Dynamically set BACKEND_URL based on environment
+        const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5000'  // Development
+            : `${window.location.protocol}//${window.location.host}`;  // Production - same origin
 
         // ==================== Initialize App ====================
         document.addEventListener('DOMContentLoaded', () => {
